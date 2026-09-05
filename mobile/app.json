@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "AI Auto Poster",
+    "slug": "ai-auto-poster",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.aiautoposter"
+    },
+    "android": {
+      "package": "com.yourcompany.aiautoposter"
+    }
+  }
+}
