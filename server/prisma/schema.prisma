@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  channels     Channel[]
+}
+
+model Channel {
+  id       String @id @default(uuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+
+  // In-app label for this content channel (not editable on YouTube itself).
+  label String
+
+  // Content configuration, set during onboarding.
+  niche           String // e.g. "stoic philosophy quotes with calm narration"
+  videoLengthSec  Int    @default(60)
+  style           String @default("informative and calm")
+  postingEveryDays Int   @default(1)
+  postingHourUtc  Int    @default(15)
+  isActive        Boolean @default(true)
+
+  // YouTube OAuth connection. Refresh token is stored AES-256-GCM encrypted
+  // (see src/lib/crypto.ts) -- never store it in plaintext.
+  youtubeChannelId    String?
+  youtubeChannelTitle String?
+  youtubeRefreshTokenEnc String?
+  youtubeConnectedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  videos VideoJob[]
+
+  @@index([userId])
+}
+
+enum VideoStatus {
+  QUEUED
+  SCRIPTING
+  SOURCING_IMAGES
+  NARRATING
+  ASSEMBLING
+  UPLOADING
+  POSTED
+  FAILED
+}
+
+model VideoJob {
+  id        String @id @default(uuid())
+  channelId String
+  channel   Channel @relation(fields: [channelId], references: [id])
+
+  status       VideoStatus @default(QUEUED)
+  title        String?
+  description  String?
+  script       Json?
+  errorMessage String?
+
+  youtubeVideoId String?
+  youtubeUrl     String?
+  thumbnailUrl   String?
+
+  scheduledFor DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([channelId])
+}
